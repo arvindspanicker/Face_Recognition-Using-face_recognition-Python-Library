@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 import face_recognition
 from face_recognition.face_recognition_cli import image_files_in_folder
 
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 camera = cv2.VideoCapture('rtmp://192.168.20.144:1935/flash/12:admin:EYE3inapp')
