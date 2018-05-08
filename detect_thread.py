@@ -11,11 +11,6 @@ import Queue
 import threading
 
 
-inputQueue1 = Queue.Queue()
-inputQueue2 = Queue.Queue()
-predictionQueue = Queue.Queue()
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
 
 ''' Not Tested Yet '''
 
@@ -27,17 +22,21 @@ def predict(knn_clf=None, model_path="trained_knn_model.clf", distance_threshold
 	if knn_clf is None:
 		with open(model_path, 'rb') as f:
 			knn_clf = pickle.load(f)
+	frame_process = True
 	while True:
 		if not inputQueue1.empty():
-			image_np = inputQueue1.get()
-			face_locations = face_recognition.face_locations(image_np)
-			if len(face_locations) == 0:
-				predictionQueue.put([])
-				continue
-			faces_encodings = face_recognition.face_encodings(image_np, known_face_locations=face_locations)
-			closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
-			are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(face_locations))]
-			predictionQueue.put([(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), face_locations, are_matches)])
+			if frame_process == True:
+				image_np = inputQueue1.get()
+				image_np = image_np[:, :, ::-1]
+				face_locations = face_recognition.face_locations(image_np)
+				if len(face_locations) == 0:
+					predictionQueue.put([])
+					continue
+				faces_encodings = face_recognition.face_encodings(image_np, known_face_locations=face_locations)
+				closest_distances = knn_clf.kneighbors(faces_encodings, n_neighbors=1)
+				are_matches = [closest_distances[0][i][0] <= distance_threshold for i in range(len(face_locations))]
+				predictionQueue.put([(pred, loc) if rec else ("unknown", loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), face_locations, are_matches)])
+			frame_process = not frame_process
 
 
 def show_prediction_labels_on_image():
@@ -58,21 +57,44 @@ def show_prediction_labels_on_image():
 		
 
 def get_image():
+	print 'Video Stream Started'
+	get_frame = True
 	while True:
-		ret, frame = camera.read()
-		inputQueue1.put(frame)
-		inputQueue2.put(frame)
+		if get_frame:
+			ret, frame = camera.read()
+			inputQueue1.put(frame)
+			inputQueue2.put(frame)
+		get_frame = not get_frame
 		
 
 
 if __name__ == "__main__":
-	predict_thread = threading.Thread(target = predict, args = ())
+	global frame_process 
+	frame_process = True
+	global inputQueue1 
+	inputQueue1 = Queue.Queue()
+	global inputQueue2 
+	inputQueue2 = Queue.Queue()
+	global predictionQueue 
+	predictionQueue = Queue.Queue()
+	global ALLOWED_EXTENSIONS 
+	ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+	predict_thread = []
+	for i in range (0,1):
+		t = threading.Thread(target = predict, args = ())
+		predict_thread.append(t)
+
 	get_feed_thread = threading.Thread(target = get_image, args = ())
 
-	predict_thread.daemon = True
+	for i in range (0,1):
+		predict_thread[i].daemon = True
+ 
 	get_feed_thread.daemon = True
 
-	predict_thread.start()
+	for i in range (0,1):
+		predict_thread[i].start()
+
 	get_feed_thread.start()
 
 	while True:
