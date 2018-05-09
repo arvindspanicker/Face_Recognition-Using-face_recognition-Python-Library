@@ -44,7 +44,7 @@ def show_prediction_labels_on_image():
 		for name, (top, right, bottom, left) in predictions:
 			cv2.rectangle(image_np,(left, top), (right, bottom),(0, 0, 255),3)
 			name = name.encode("UTF-8")
-			cv2.putText(image_np, name ,(left +6 ,bottom - 10 ), cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),1,cv2.CV_AA)
+			cv2.putText(image_np, name ,(left +6 ,bottom - 10 ), cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),1,cv2.LINE_AA)
 		#for name, (top, right, bottom, left) in predictions:
 		   # print("- Found {} at ({}, {})".format(name, left, top))
 		cv2.imshow('Window',image_np)
@@ -89,26 +89,13 @@ if __name__ == "__main__":
 
 	predict_process = []
 	while True:
-		for i in range(1000):
+		for i in range(5000):
 			p = Process(target = predict, args = ())
 			p.daemon = True
 			predict_process.append(p)
 			p.start()
 		
 
-		for i in range(1000):
+		for i in range(5000):
 			p.terminate()
-		'''p = Process(target = predict, args = ())
-		q = Process(target = predict, args = ())
-		r = Process(target = predict, args = ())
-		p.daemon = True
-		q.daemon = True
-		r.daemon = True
-		p.start()
-		q.start()
-		r.start()
-		p.join()
-		q.join()
-		r.join()
-		'''
 
