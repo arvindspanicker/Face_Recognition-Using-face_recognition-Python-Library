@@ -8,7 +8,6 @@ import face_recognition
 
 
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 camera = cv2.VideoCapture('rtmp://192.168.20.144:1935/flash/12:admin:EYE3inapp')
 
@@ -18,6 +17,8 @@ def predict(image_np, knn_clf=None, model_path=None, distance_threshold=0.6):
 	if knn_clf is None:
 		with open(model_path, 'rb') as f:
 			knn_clf = pickle.load(f)
+	small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+	rgb_small_frame = small_frame[:, :, ::-1]
 	face_locations = face_recognition.face_locations(image_np)
 	if len(face_locations) == 0:
 		return []
@@ -34,14 +35,17 @@ def show_prediction_labels_on_image(image_np, predictions):
 		cv2.putText(image_np, name ,(left +6 ,bottom - 10 ), cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),1,cv2.CV_AA)
 	cv2.imshow('Window',image_np)
 	key = cv2.waitKey(20)
-	if key == 1048603:
+	if key == 1048603: #esc key to exit
 		exit(0)
 
 
 if __name__ == "__main__":
+	process_frame = True
 	while True:
-		ret, frame = camera.read()
-		predictions = predict(frame, model_path="trained_knn_model.clf")
-	    	for name, (top, right, bottom, left) in predictions:
-		    print("- Found {} at ({}, {})".format(name, left, top))
-		show_prediction_labels_on_image(frame, predictions) 
+		if process_frame:
+			ret, frame = camera.read()
+			predictions = predict(frame, model_path="trained_knn_model.clf")
+		    	for name, (top, right, bottom, left) in predictions:
+			    print("- Found {} at ({}, {})".format(name, left, top))
+			show_prediction_labels_on_image(frame, predictions) 
+		process_frame = not process_frame

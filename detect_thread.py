@@ -40,20 +40,19 @@ def predict(knn_clf=None, model_path="trained_knn_model.clf", distance_threshold
 
 
 def show_prediction_labels_on_image():
-	while True:
-		if not predictionQueue.empty():
-			predictions = predictionQueue.get()
-			image_np = inputQueue2.get()
-			for name, (top, right, bottom, left) in predictions:
-				cv2.rectangle(image_np,(left, top), (right, bottom),(0, 0, 255),3)
-				name = name.encode("UTF-8")
-				cv2.putText(image_np, name ,(left +6 ,bottom - 10 ), cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),1,cv2.CV_AA)
-			for name, (top, right, bottom, left) in predictions:
-			    print("- Found {} at ({}, {})".format(name, left, top))
-			cv2.imshow('Window',image_np)
-			key = cv2.waitKey(20)
-			if key == 1048603: #esc key to quit
-				break
+	if not predictionQueue.empty():
+		predictions = predictionQueue.get()
+		image_np = inputQueue2.get()
+		for name, (top, right, bottom, left) in predictions:
+			cv2.rectangle(image_np,(left, top), (right, bottom),(0, 0, 255),3)
+			name = name.encode("UTF-8")
+			cv2.putText(image_np, name ,(left +6 ,bottom - 10 ), cv2.FONT_HERSHEY_SIMPLEX, 2,(255,255,255),1,cv2.CV_AA)
+		for name, (top, right, bottom, left) in predictions:
+		    print("- Found {} at ({}, {})".format(name, left, top))
+		cv2.imshow('Window',image_np)
+		key = cv2.waitKey(20)
+		if key == 1048603: #esc key to quit
+			exit(0)
 		
 
 def get_image():
