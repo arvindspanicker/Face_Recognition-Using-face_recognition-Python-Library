@@ -1,5 +1,5 @@
 # Face_Recognition-Using-face_recognition-Python-Library
-<h3>Using Knn<h3>
+<h3>Using Knn</h3>
 
 <h4>Install the following dependencies</h4>
 
